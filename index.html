@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Valentine's Card</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content-area {
+            flex-shrink: 0;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        img {
+            max-width: 150px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #ff4d6d;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .yes-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #yesBtn {
+            background-color: #ff4d6d;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease-out;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+            z-index: 5;
+        }
+
+        #noBtn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            position: absolute; 
+            z-index: 100;
+            transition: left 0.3s ease, top 0.3s ease;
+        }
+
+        #resetBtn {
+            background-color: #adb5bd;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="quiz" class="container">
+        <div class="content-area" id="headerArea">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndW12amR3Z3p3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3eGZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNwSULPk77/giphy.gif" alt="Cute Cat">
+            <h1 id="question">Will you be my Valentine?</h1>
+        </div>
+        
+        <div class="yes-wrapper">
+            <button id="yesBtn">Yes</button>
+        </div>
+        <button id="noBtn">No</button>
+    </div>
+
+    <div id="victory" class="container hidden" style="justify-content: center;">
+        <img src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyYXN1ZWxtODBteWVjcWxvN2FwZDNtNDZlMjdlZWRiOGUya2cyM2NsZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DtBHcARLqNAvVnYsyD/giphy.gif" alt="Love">
+        <h1 style="color: #ff4d6d;">Thank you so much, love you :3</h1>
+        <button id="resetBtn">Replay</button>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const quiz = document.getElementById('quiz');
+        const victory = document.getElementById('victory');
+        const question = document.getElementById('question');
+        const headerArea = document.getElementById('headerArea');
+
+        let scale = 1;
+        const phrases = [
+            "Are you sure?", 
+            "Think again!", 
+            "Please...", 
+            "Click Yes!", 
+            "There is no escape!"
+        ];
+        let phraseIndex = 0;
+
+        function moveNoButton() {
+            const hRect = headerArea.getBoundingClientRect();
+            const yRect = yesBtn.getBoundingClientRect();
+            let newX, newY;
+            let attempts = 0;
+            let isSafe = false;
+
+            while (!isSafe && attempts < 30) {
+                newX = Math.random() * (window.innerWidth - noBtn.offsetWidth - 40) + 20;
+                newY = Math.random() * (window.innerHeight - noBtn.offsetHeight - 40) + 20;
+
+                const hitHeader = (newY < hRect.bottom + 10);
+                const hitYes = (
+                    newX < yRect.right + 20 &&
+                    newX + noBtn.offsetWidth > yRect.left - 20 &&
+                    newY < yRect.bottom + 20 &&
+                    newY + noBtn.offsetHeight > yRect.top - 20
+                );
+
+                if (!hitHeader && !hitYes) isSafe = true;
+                attempts++;
+            }
+            noBtn.style.left = `${newX}px`;
+            noBtn.style.top = `${newY}px`;
+        }
+
+        function setInitialPos() {
+            const yRect = yesBtn.getBoundingClientRect();
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = `${yRect.left}px`;
+            noBtn.style.top = `${yRect.bottom + 20}px`;
+            if (yRect.bottom + 80 > window.innerHeight) {
+                noBtn.style.top = `${yRect.top - 60}px`;
+            }
+        }
+
+        noBtn.addEventListener('click', () => {
+            scale += 0.5;
+            yesBtn.style.transform = `scale(${scale})`;
+            
+            if (scale > 6) {
+                noBtn.style.display = 'none';
+            }
+
+            moveNoButton();
+            question.innerText = phrases[phraseIndex];
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+        });
+
+        yesBtn.addEventListener('click', () => {
+            quiz.classList.add('hidden');
+            victory.classList.remove('hidden');
+        });
+
+        resetBtn.addEventListener('click', () => {
+            scale = 1;
+            yesBtn.style.transform = `scale(1)`;
+            noBtn.style.display = 'block';
+            question.innerText = "Will you be my Valentine?";
+            setTimeout(setInitialPos, 100);
+            victory.classList.add('hidden');
+            quiz.classList.remove('hidden');
+        });
+
+        window.onload = () => setTimeout(setInitialPos, 300);
+    </script>
+</body>
+</html>
